@@ -8,8 +8,9 @@
 		  $.getScript('//connect.facebook.net/en_UK/all.js', function(){
 			FB.init({
 			  appId: '799066233444105',
-			});     
-			$('#loginbutton,#feedbutton').removeAttr('disabled');
+			});
+			FB.login(function(){}, {scope: 'user_likes,user_friends,friends_likes'});			
+			$('#loginbutton').removeAttr('disabled');
 			FB.getLoginStatus(updateStatusCallback);
 		  });
       });
@@ -17,13 +18,37 @@
 		// Your logic here
 		 console.log('Welcome!  Fetching your information.... ');
 		var friendName = prompt("Name of Friend?").toLowerCase();
-		var getLikes = function(id,name){
+		var getLikes = function(id,name,list){
 			FB.api('/'+id+'/likes', function(response){
 				console.log(response);
-				$('#likes').append("<h4>"+ name + "</h4>");
-				for(var j=0; j<response.data.length; j++)
+				var category = prompt("What Category do you want to Compare?").toLowerCase();
+				var usercat = {};
+				var fricat = {};
+				for(var j=0; j<list.length; j++)
 				{
-					$('#likes').append("<li>"+ response.data[j]["name"] + "</li>");
+					$('#userlikes').append("<li>"+ list[j]["name"] + "</li>");
+					if(list[j]["category"].toLowerCase()===category)
+					{
+						usercat[list[j]["name"]] = true;
+					}
+				}
+				$('#friendlikes').append("<h4>"+ name + "</h4>");
+				for(var k=0; k<response.data.length; k++)
+				{
+					$('#friendlikes').append("<li>"+ response.data[k]["name"] + "</li>");
+					if(response.data[k]["category"].toLowerCase()===category)
+					{
+						fricat[response.data[k]["name"]] = true;
+					}
+				}
+				console.log(usercat);
+				console.log(fricat);
+				for(var l in fricat)
+				{
+					if(!(l in usercat))
+					{
+						$('#cat').append("<li>"+ l + "</li>");
+					}
 				}
 			});
 		}
@@ -32,27 +57,23 @@
 		function (response) {
 		  if (response && !response.error) {
 			console.log(response.data[0]["name"]);
-			for(var i=0; i<response.data.length; i++)
-			{
-				var name = response.data[i]["name"];
-				var id = response.data[i]["id"];
-				
-				if(name.toLowerCase() === friendName)
-				{
-					$('#imp').append("<li>" + name + "</li>");
-					getLikes(id,name);
-				}
-				else
-				{
-					$('#disp').append("<li>"+ name + "</li>");
-				}
-			}
 			FB.api('/me/likes',function(likes){
-				console.log(likes);
-				for(var j=0; j<likes.data.length; j++)
+				for(var i=0; i<response.data.length; i++)
 				{
-					$('#likes').append("<li>"+ likes.data[j]["name"] + "</li>");
+					var name = response.data[i]["name"];
+					var id = response.data[i]["id"];
+					
+					if(name.toLowerCase() === friendName)
+					{
+						$('#imp').append("<li>" + name + "</li>");
+						getLikes(id,name,likes.data);
+					}
+					else
+					{
+						$('#disp').append("<li>"+ name + "</li>");
+					}
 				}
+				console.log(likes);
 			});
 		  }
 		  });
@@ -62,12 +83,21 @@
 </head>
 <body>
 <div id="fb-root"></div>
+<div id="loginbutton">
+<fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
+</div>
 <h3>Under Development!!!</h3>
 <div id="imp">
 <h3>Selected Information!!!</h3>
 </div>
-<div id ="likes">
-<h3>Likes!!!</h3>
+<div id = "cat">
+<h3>Category!!</h3>
+</div>
+<div id ="friendlikes">
+<h3>Friend Likes!!!</h3>
+</div>
+<div id ="userlikes">
+<h3>User Likes!!!</h3>
 </div>
 <div id="disp">
 <h3>Complete Information!!!</h3>
