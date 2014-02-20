@@ -18,18 +18,47 @@
 		// Your logic here
 		 console.log('Welcome!  Fetching your information.... ');
 		var friendName = prompt("Name of Friend?").toLowerCase();
+		var getIDS = function(list){
+			for(var l in list)
+			{
+				$.getJSON('http://www.omdbapi.com/?t=' + l, function(json_data){
+					if(json_data.Response === "True")
+					{
+						$('#cat').append("<li>" + json_data.imdbID + "</li>");
+						var imdbID = json_data.imdbID.substr(2);
+						/*
+						$.getJSON("https://api-test.filmaster.tv/rest/1.0/film/" + imdbID +"/similar/?&callback=?", null,
+						function(data){console.log(JSON.stringify(data));});
+						$.ajax({
+						type: "GET",
+						//crossDomain: true,
+						username: "test_imdb",
+						password: "test",
+						url: "https://api-test.filmaster.tv/rest/1.0/film/" + imdbID +"/similar/?&callback=?",
+						dataType: "jsonp",
+						success: function(data){
+								console.log(JSON.stringify(data));
+						}
+						});
+						*/
+					}
+				});
+			}
+		}
 		var getLikes = function(id,name,list){
 			FB.api('/'+id+'/likes', function(response){
 				console.log(response);
 				var category = prompt("What Category do you want to Compare?").toLowerCase();
 				var usercat = {};
 				var fricat = {};
+				var likePool = {};
 				for(var j=0; j<list.length; j++)
 				{
 					$('#userlikes').append("<li>"+ list[j]["name"] + "</li>");
 					if(list[j]["category"].toLowerCase()===category)
 					{
 						usercat[list[j]["name"]] = true;
+						likePool[list[j]["name"]] = true;
 					}
 				}
 				$('#friendlikes').append("<h4>"+ name + "</h4>");
@@ -39,6 +68,7 @@
 					if(response.data[k]["category"].toLowerCase()===category)
 					{
 						fricat[response.data[k]["name"]] = true;
+						likePool[response.data[k]["name"]] = true;
 					}
 				}
 				console.log(usercat);
@@ -50,14 +80,37 @@
 						$('#cat').append("<li>"+ l + "</li>");
 					}
 				}
+				getIDS(likePool);
 			});
 		}
+		function getProfileImage(id,name) {
+		 
+			var $photo = $('.photo'),
+				$fbPhoto = $('img.fb-photo');
+		 
+		 
+			FB.api("/"+id+"/picture?width=90&height=90",  function(response) {
+		 
+				var profileImage = response.data.url.split('https://')[1], //remove https to avoid any cert issues
+					randomNumber = Math.floor(Math.random()*256);
+		 
+			   //remove if there and add image element to dom to show without refresh
+			   if( $fbPhoto.length ){
+				   $fbPhoto.remove();
+			   }
+				 //add random number to reduce the frequency of cached images showing
+			   $photo.append('<img class=\"fb-photo img-polaroid\" src=\"http://' + profileImage + '?' + randomNumber + '\">');
+			   $('.photo').append("<li>"+name+"</li>");
+			}); 
+		}
+
 		FB.api(
 		'/me/friends',
 		function (response) {
 		  if (response && !response.error) {
 			console.log(response.data[0]["name"]);
 			FB.api('/me/likes',function(likes){
+				var markup = '';
 				for(var i=0; i<response.data.length; i++)
 				{
 					var name = response.data[i]["name"];
@@ -66,11 +119,12 @@
 					if(name.toLowerCase() === friendName)
 					{
 						$('#imp').append("<li>" + name + "</li>");
+						getProfileImage(id, name);
 						getLikes(id,name,likes.data);
 					}
 					else
 					{
-						$('#disp').append("<li>"+ name + "</li>");
+						getProfileImage(id, name);
 					}
 				}
 				console.log(likes);
@@ -83,15 +137,12 @@
 </head>
 <body>
 <div id="fb-root"></div>
-<div id="loginbutton">
-<fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
-</div>
 <h3>Under Development!!!</h3>
 <div id="imp">
 <h3>Selected Information!!!</h3>
 </div>
 <div id = "cat">
-<h3>Category!!</h3>
+<h3>Suggestions!!</h3>
 </div>
 <div id ="friendlikes">
 <h3>Friend Likes!!!</h3>
@@ -99,7 +150,7 @@
 <div id ="userlikes">
 <h3>User Likes!!!</h3>
 </div>
-<div id="disp">
+<div id="disp" class="photo">
 <h3>Complete Information!!!</h3>
 </div>
 <br>
