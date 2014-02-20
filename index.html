@@ -13,11 +13,12 @@
 			$('#loginbutton').removeAttr('disabled');
 			FB.getLoginStatus(updateStatusCallback);
 		  });
+		 
       });
 	  function updateStatusCallback(){
 		// Your logic here
 		 console.log('Welcome!  Fetching your information.... ');
-		var friendName = prompt("Name of Friend?").toLowerCase();
+		//var friendName = prompt("Name of Friend?").toLowerCase();
 		var getIDS = function(list){
 			for(var l in list)
 			{
@@ -48,7 +49,7 @@
 		var getLikes = function(id,name,list){
 			FB.api('/'+id+'/likes', function(response){
 				console.log(response);
-				var category = prompt("What Category do you want to Compare?").toLowerCase();
+				var category = prompt("What Category do you want to Compare? (movie or tv show)").toLowerCase();
 				var usercat = {};
 				var fricat = {};
 				var likePool = {};
@@ -99,39 +100,58 @@
 				   $fbPhoto.remove();
 			   }
 				 //add random number to reduce the frequency of cached images showing
-			   $photo.append('<img class=\"fb-photo img-polaroid\" src=\"http://' + profileImage + '?' + randomNumber + '\">');
-			   $('.photo').append("<li>"+name+"</li>");
+				//console.log(name);
+				var nameArray = name.split(" ");
+				var nameCombined = nameArray[0]+"-"+nameArray[1];
+			   $photo.append('<img id='+id+' class='+ nameCombined +' src="https://' + profileImage + '?' + randomNumber + '">');
+			   $photo.append("<p>"+name+"</p>");
+	
+			   $( '#'+id ).bind('click',function() {
+					//$(this).css('color', 'blue');
+					var fName = $(this).attr('class').split("-");
+					fName = fName[0]+" "+fName[1];
+					$('#userlikes').empty();
+					$('#userlikes').append("<h3>User Likes!!!</h3>");
+					$('#friendlikes').empty();
+					$('#friendlikes').append("<h3>Friend Likes!!!</h3>");
+					$('#cat').empty();
+					$('#cat').append("<h3>Suggestions!!</h3>");
+					$('#imp').empty();
+					$('#imp').append("<h3>Selected Information!!!</h3>");
+					console.log(fName);
+					console.log(this.id);
+					suggest(fName, this.id);
+				});
 			}); 
 		}
-
-		FB.api(
-		'/me/friends',
-		function (response) {
-		  if (response && !response.error) {
-			console.log(response.data[0]["name"]);
-			FB.api('/me/likes',function(likes){
-				var markup = '';
-				for(var i=0; i<response.data.length; i++)
-				{
-					var name = response.data[i]["name"];
-					var id = response.data[i]["id"];
-					
-					if(name.toLowerCase() === friendName)
+		function getFriends()
+		{
+			FB.api(
+				'/me/friends',
+				function (response) {
+				  if (response && !response.error) {
+					console.log(response.data[0]["name"]);
+					for(var i=0; i<response.data.length; i++)
 					{
-						$('#imp').append("<li>" + name + "</li>");
-						getProfileImage(id, name);
-						getLikes(id,name,likes.data);
+						var name = response.data[i]["name"];
+						var id = response.data[i]["id"];
+						getProfileImage(id,name);
 					}
-					else
-					{
-						getProfileImage(id, name);
-					}
+				  }
+				  });
+		}
+		function suggest(friendName, id)
+		{
+			FB.api('/me/likes',function(response){
+				if (response && !response.error) {
+					$('#imp').append("<h4>" + friendName + "</h4>");
+					getLikes(id,friendName,response.data);
+					console.log(response);
 				}
-				console.log(likes);
 			});
-		  }
-		  });
-		
+		}
+		 getFriends();
+		 console.log("Done!");
 	}
     </script>
 </head>
