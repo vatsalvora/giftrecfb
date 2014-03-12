@@ -1,0 +1,36 @@
+body{
+	background-color: #FFCC66;
+}
+h3{
+	color: #0000CC;
+}
+li{
+	color: #0000CC;
+}
+#disp {
+    text-align: center;
+}
+figure {
+    display: inline-block;
+	padding: 5px;
+}
+figcaption {
+    margin: 10px 0 0 0;
+    font-variant: small-caps;
+    font-family: Arial;
+    font-weight: bold;
+	color: #0000CC;
+}
+img:hover {
+    transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    -webkit-transform: scale(1.1);
+    -moz-transform: scale(1.1);
+    -o-transform: scale(1.1);
+}
+img {
+    transition: transform 0.2s;
+    -webkit-transition: -webkit-transform 0.2s;
+    -moz-transition: -moz-transform 0.2s;
+    -o-transition: -o-transform 0.2s;
+}
