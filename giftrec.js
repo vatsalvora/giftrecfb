@@ -107,6 +107,15 @@ $(document).ready(function() {
 				});
 			}); 
 		}
+		
+		function compare(a,b){
+			if(a["name"]<b["name"])
+				return -1;
+			if(a["name"]>b["name"])
+				return 1;
+			return 0;
+		}
+		
 		function getFriends()
 		{
 			FB.api(
@@ -114,10 +123,12 @@ $(document).ready(function() {
 				function (response) {
 				  if (response && !response.error) {
 					console.log(response.data[0]["name"]);
-					for(var i=0; i<response.data.length; i++)
+					var friendsArray = response.data;
+					friendsArray.sort(compare);
+					for(var i=0; i<friendsArray.length; i++)
 					{
-						var name = response.data[i]["name"];
-						var id = response.data[i]["id"];
+						var name = friendsArray[i]["name"];
+						var id = friendsArray[i]["id"];
 						getProfileImage(id,name);
 					}
 				  }
