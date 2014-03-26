@@ -16,8 +16,9 @@ $(document).ready(function() {
 		$('#friendlikes').hide();
 		$('#userlikes').hide();
 		$('#disp').hide();
+		$('#disp').append('<h3>Friends !!!</h3>');
 		getFriends();
-		$('#disp').delay(50000).fadeIn("slow", function(){$('#loading').hide()});
+		$('#disp').delay(1500).fadeIn("slow", function(){$('#loading').hide()});
 		console.log("Done!");
 		//var friendName = prompt("Name of Friend?").toLowerCase();
 		var getIDS = function(list){
@@ -80,56 +81,53 @@ $(document).ready(function() {
 			var $photo = $('.photo');
 		 
 		 
-			FB.api("/"+id+"/picture?width=90&height=90",  function(response) {
 		 
-				var profileImage = response.data.url.split('https://')[1], //remove https to avoid any cert issues
-					randomNumber = Math.floor(Math.random()*256);
-		 
-				 //add random number to reduce the frequency of cached images showing
-				//console.log(name);
-				var nameArray = name.split(" ");
-				var nameCombined = nameArray[0]+"-"+nameArray[1];
-			   $photo.append('<figure id='+id+' class='+ nameCombined +'><img src="https://' + profileImage + '?' + randomNumber + 
-			   '" height="90" width="90" alt="'+name+' is loading!"><figcaption>'+name+'</figcaption></figure>');
-	
-			   $( '#'+id ).bind('click',function() {
-					//$(this).css('color', 'blue');
-					var fName = $(this).attr('class').split("-");
-					fName = fName[0]+" "+fName[1];
-					$('#userlikes').empty();
-					$('#userlikes').append("<h3>User Likes!!!</h3>");
-					$('#friendlikes').empty();
-					$('#friendlikes').append("<h3>Friend Likes!!!</h3>");
-					$('#cat').empty();
-					$('#cat').append("<h3>Suggestions!!</h3>");
-					$('#imp').empty();
-					$('#imp').append("<h3>Selected Information!!!</h3>");
-					console.log(fName);
-					console.log(this.id);
-					$('#message').show();
-					$(function() {
-					$( "#dialog" ).dialog({
-					  resizable: true,
-					  height:250,
-					  modal: true,
-					  buttons: {
-						"Movie": function() {
-							getUserLikes(id,name,'movie');
-							$('#message').hide();
-							$("html, body").animate({ scrollTop:0 },"slow");
-						  $( this ).dialog( "close" );
-						},
-						"Tv Show": function() {
-							getUserLikes(id,name,'tv show');
-							$('#message').hide();
-							$("html, body").animate({ scrollTop:0 },"slow");
-						  $( this ).dialog( "close" );
-						}
-					  }
-					});
-				  });
+			var profileImage = 'https://graph.facebook.com/'+id+'/picture?width=90&height=90'; //remove https to avoid any cert issues
+	 
+			 //add random number to reduce the frequency of cached images showing
+			//console.log(name);
+			var nameArray = name.split(" ");
+			var nameCombined = nameArray[0]+"-"+nameArray[1];
+		   $photo.append('<figure id='+id+' class='+ nameCombined +'><img src="' + profileImage + 
+		   '" height="90" width="90" alt="'+name+' is loading!"><figcaption>'+name+'</figcaption></figure>');
+
+		   $( '#'+id ).bind('click',function() {
+				//$(this).css('color', 'blue');
+				var fName = $(this).attr('class').split("-");
+				fName = fName[0]+" "+fName[1];
+				$('#userlikes').empty();
+				$('#userlikes').append("<h3>User Likes!!!</h3>");
+				$('#friendlikes').empty();
+				$('#friendlikes').append("<h3>Friend Likes!!!</h3>");
+				$('#cat').empty();
+				$('#cat').append("<h3>Suggestions!!</h3>");
+				$('#imp').empty();
+				$('#imp').append("<h3>Selected Information!!!</h3>");
+				console.log(fName);
+				console.log(this.id);
+				$('#message').show();
+				$(function() {
+				$( "#dialog" ).dialog({
+				  resizable: true,
+				  height:250,
+				  modal: true,
+				  buttons: {
+					"Movie": function() {
+						getUserLikes(id,name,'movie');
+						$('#message').hide();
+						$("html, body").animate({ scrollTop:0 },"slow");
+					  $( this ).dialog( "close" );
+					},
+					"Tv Show": function() {
+						getUserLikes(id,name,'tv show');
+						$('#message').hide();
+						$("html, body").animate({ scrollTop:0 },"slow");
+					  $( this ).dialog( "close" );
+					}
+				  }
 				});
-			}); 
+			  });
+			});
 		}
 		
 		function compare(a,b){
