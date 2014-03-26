@@ -15,6 +15,10 @@ $(document).ready(function() {
 		console.log('Welcome!  Fetching your information.... ');
 		$('#friendlikes').hide();
 		$('#userlikes').hide();
+		$('#disp').hide();
+		getFriends();
+		$('#disp').delay(50000).fadeIn("slow", function(){$('#loading').hide()});
+		console.log("Done!");
 		//var friendName = prompt("Name of Friend?").toLowerCase();
 		var getIDS = function(list){
 			for(var l in list)
@@ -32,11 +36,10 @@ $(document).ready(function() {
 				});
 			}
 		}
-		var getLikes = function(id,name,list){
+		var getLikes = function(id,name,list,category){
 			FB.api('/'+id+'/likes', function(response){
-				console.log(response);
-				var category = prompt("What Category do you want to Compare? (movie or tv show)","movie").toLowerCase();
-				var usercat = {};
+					console.log(response);
+					var usercat = {};
 				var fricat = {};
 				var likePool = {};
 				for(var j=0; j<list.length; j++)
@@ -69,6 +72,7 @@ $(document).ready(function() {
 				}
 				console.log(likePool);
 				getIDS(likePool);
+								
 			});
 		}
 		function getProfileImage(id,name) {
@@ -86,7 +90,7 @@ $(document).ready(function() {
 				var nameArray = name.split(" ");
 				var nameCombined = nameArray[0]+"-"+nameArray[1];
 			   $photo.append('<figure id='+id+' class='+ nameCombined +'><img src="https://' + profileImage + '?' + randomNumber + 
-			   '"/><figcaption>'+name+'</figcaption></figure>');
+			   '" height="90" width="90" alt="'+name+' is loading!"><figcaption>'+name+'</figcaption></figure>');
 	
 			   $( '#'+id ).bind('click',function() {
 					//$(this).css('color', 'blue');
@@ -102,8 +106,28 @@ $(document).ready(function() {
 					$('#imp').append("<h3>Selected Information!!!</h3>");
 					console.log(fName);
 					console.log(this.id);
-					$("html, body").animate({ scrollTop:0 },"slow");
-					suggest(fName, this.id);
+					$('#message').show();
+					$(function() {
+					$( "#dialog" ).dialog({
+					  resizable: true,
+					  height:250,
+					  modal: true,
+					  buttons: {
+						"Movie": function() {
+							getUserLikes(id,name,'movie');
+							$("html, body").animate({ scrollTop:0 },"slow");
+							$('#message').hide();
+						  $( this ).dialog( "close" );
+						},
+						"Tv Show": function() {
+							getUserLikes(id,name,'tv show');
+							$("html, body").animate({ scrollTop:0 },"slow");
+							$('#message').hide();
+						  $( this ).dialog( "close" );
+						}
+					  }
+					});
+				  });
 				});
 			}); 
 		}
@@ -134,16 +158,15 @@ $(document).ready(function() {
 				  }
 				  });
 		}
-		function suggest(friendName, id)
+		
+		function getUserLikes(id,friendName,category)
 		{
 			FB.api('/me/likes',function(response){
 				if (response && !response.error) {
 					$('#imp').append("<h3>" + friendName + "</h3>");
-					getLikes(id,friendName,response.data);
+					getLikes(id,friendName,response.data,category);
 					console.log(response);
 				}
 			});
 		}
-		 getFriends();
-		 console.log("Done!");
 	}
