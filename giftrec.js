@@ -115,14 +115,14 @@ $(document).ready(function() {
 					  buttons: {
 						"Movie": function() {
 							getUserLikes(id,name,'movie');
-							$("html, body").animate({ scrollTop:0 },"slow");
 							$('#message').hide();
+							$("html, body").animate({ scrollTop:0 },"slow");
 						  $( this ).dialog( "close" );
 						},
 						"Tv Show": function() {
 							getUserLikes(id,name,'tv show');
-							$("html, body").animate({ scrollTop:0 },"slow");
 							$('#message').hide();
+							$("html, body").animate({ scrollTop:0 },"slow");
 						  $( this ).dialog( "close" );
 						}
 					  }
