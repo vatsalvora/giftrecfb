@@ -37,6 +37,13 @@ $(document).ready(function() {
 				});
 			}
 		}
+		var getSimilarArtist = function(list){
+			for(var l in list){
+				$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getsimilar&artist='+l+'&api_key=8a981fbe76b27b7e1fd32e9248a0454b', function(data){
+					$('#cat').append("<li>" + data.similarartists.artist[1].name+ "</li>");
+				});
+			}
+		}
 		var getLikes = function(id,name,list,category){
 			FB.api('/'+id+'/likes', function(response){
 					console.log(response);
@@ -72,8 +79,14 @@ $(document).ready(function() {
 					}
 				}
 				console.log(likePool);
-				getIDS(likePool);
-								
+				if(category==='musician/band')
+				{
+					getSimilarArtist(likePool);
+				}
+				else
+				{
+					getIDS(likePool);
+				}			
 			});
 		}
 		function getProfileImage(id,name) {
@@ -109,7 +122,8 @@ $(document).ready(function() {
 				$(function() {
 				$( "#dialog" ).dialog({
 				  resizable: true,
-				  height:250,
+				  height:200,
+				  width: 450,
 				  modal: true,
 				  buttons: {
 					"Movie": function() {
@@ -123,11 +137,17 @@ $(document).ready(function() {
 						$('#message').hide();
 						$("html, body").animate({ scrollTop:0 },"slow");
 					  $( this ).dialog( "close" );
+					  },
+					  "Musician/Band": function() {
+						getUserLikes(id,name,'musician/band');
+						$('#message').hide();
+						$("html, body").animate({ scrollTop:0 },"slow");
+					  $( this ).dialog( "close" );
 					}
-				  }
+				}
+				});
 				});
 			  });
-			});
 		}
 		
 		function compare(a,b){
