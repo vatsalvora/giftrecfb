@@ -40,7 +40,11 @@ $(document).ready(function() {
 								var index = Math.floor((data.objects.length-1)*Math.random()); //Randomize selections from the suggestions
 								//Get the film names from the response of filmmmaster's api
 								$.getJSON('http://www.omdbapi.com/?i=' + 'tt' + data.objects[index].film_id, function(film_data){
-									$('#cat').append("<li>" + film_data.Title + "</li>");
+									var name = film_data.Title;
+									if(typeof name != 'undefined')
+									{
+										$('#cat').append("<li>" +  + "</li>");
+									}
 								});
 							}
 						});
@@ -56,7 +60,11 @@ $(document).ready(function() {
 					if(data.similarartists.artist.length>0)
 					{
 						var index = Math.floor((data.similarartists.artist.length-1)*Math.random());
-						$('#cat').append("<li>" + data.similarartists.artist[index].name+ "</li>");
+						var name = data.similarartists.artist[index].name;
+						if(typeof name != 'undefined')
+						{
+							$('#cat').append("<li>" + name + "</li>");
+						}
 					}
 				});
 			}
