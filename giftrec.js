@@ -29,9 +29,13 @@ $(document).ready(function() {
 					{
 						var imdbID = json_data.imdbID.substr(2);
 						$.getJSON("http://ec2-54-84-252-222.compute-1.amazonaws.com/api.php",  {id: imdbID}, function(data){
-							$.getJSON('http://www.omdbapi.com/?i=' + 'tt' + data.objects[0].film_id, function(film_data){
-								$('#cat').append("<li>" + film_data.Title + "</li>");
-							});
+							if(data.objects.length>0)
+							{
+								var index = Math.floor((data.objects.length-1)*Math.random());
+								$.getJSON('http://www.omdbapi.com/?i=' + 'tt' + data.objects[index].film_id, function(film_data){
+									$('#cat').append("<li>" + film_data.Title + "</li>");
+								});
+							}
 						});
 					}
 				});
@@ -40,7 +44,11 @@ $(document).ready(function() {
 		var getSimilarArtist = function(list){
 			for(var l in list){
 				$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getsimilar&artist='+l+'&api_key=8a981fbe76b27b7e1fd32e9248a0454b', function(data){
-					$('#cat').append("<li>" + data.similarartists.artist[1].name+ "</li>");
+					if(data.similarartists.artist.length>0)
+					{
+						var index = Math.floor((data.similarartists.artist.length-1)*Math.random());
+						$('#cat').append("<li>" + data.similarartists.artist[index].name+ "</li>");
+					}
 				});
 			}
 		}
