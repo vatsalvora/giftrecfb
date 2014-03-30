@@ -6,8 +6,10 @@ p{
 	font-size:20px;
 }
 li {
-	list-style-type: square;
+	list-style-type: none;
+	display: inline;
 }
+
 li .ui-selected {
 	background: #0000CC; color: white;
 }
@@ -22,6 +24,9 @@ h1{
 }
 h3{
 	color: #0000CC;
+}
+h4{
+color: #0000CC;
 }
 li{
 	color: #0000CC;

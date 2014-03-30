@@ -1,4 +1,13 @@
 $(document).ready(function() {
+		$('#links > ul > li > a').on('click', function(e){
+			e.preventDefault();
+			var anchorid = $(this.hash);
+			
+			if(anchorid.length == 0) anchorid = $('a[name="' + this.hash.substr(1) + '"]');
+			else anchorid = $('html');
+			
+			$('html, body').animate({ scrollTop: anchorid.offset().top }, 450);
+		  });
         $.ajaxSetup({ cache: true });
 		  $.getScript('//connect.facebook.net/en_UK/all.js', function(){
 			FB.init({
@@ -17,15 +26,19 @@ $(document).ready(function() {
 		$('#friendlikes').hide();
 		$('#userlikes').hide();
 		$('#disp').hide();
-		$('#disp').append('<h3>Friends !!!</h3>');
 		getFriends();
-		$('#disp').delay(1500).fadeIn("slow", function(){$('#loading').hide()});
+		$('#disp').delay(1500).fadeIn("slow", function(){
+			$('#topNav').show();
+			$('#botNav').show();
+			$('#loading').hide();
+		});
 		console.log("Done!");
 		//var friendName = prompt("Name of Friend?").toLowerCase();
 		
 		//This function is for getting movie suggestions from 
 		//Filmmaster using IMDB ids
-		var getIDS = function(list){
+		function getIDS(list){
+			var added = {};
 			for(var l in list)
 			{
 				//Get the imdb id for the movie title
@@ -43,7 +56,10 @@ $(document).ready(function() {
 									var name = film_data.Title;
 									if(typeof name != 'undefined')
 									{
-										$('#cat').append("<li>" +  + "</li>");
+										if(added[name]!= true){
+											added[name] = true;
+											$('#message').append('<li style="display:block;">' + name + '</li>');
+										}
 									}
 								});
 							}
@@ -55,6 +71,7 @@ $(document).ready(function() {
 		//This function is for getting music suggestions from 
 		//Last.Fm
 		var getSimilarArtist = function(list){
+			var added = {};
 			for(var l in list){
 				$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getsimilar&artist='+l+'&api_key=8a981fbe76b27b7e1fd32e9248a0454b', function(data){
 					if(data.similarartists.artist.length>0)
@@ -63,7 +80,11 @@ $(document).ready(function() {
 						var name = data.similarartists.artist[index].name;
 						if(typeof name != 'undefined')
 						{
-							$('#cat').append("<li>" + name + "</li>");
+							if(added[name] != true)
+							{
+								added[name] = true;
+								$('#message').append('<li style="display:block;">' + name + '</li>');
+							}
 						}
 					}
 				});
@@ -71,7 +92,7 @@ $(document).ready(function() {
 		}
 		//This function is for getting the Facebook User
 		//likes for the friend the user selected
-		var getLikes = function(id,name,list,category){
+		function getLikes(id,name,list,category){
 			FB.api('/'+id+'/likes', function(response){
 					console.log(response);
 					var usercat = {};
@@ -96,8 +117,6 @@ $(document).ready(function() {
 						likePool[response.data[k]["name"]] = true;
 					}
 				}
-				//console.log(usercat);
-				//console.log(fricat);
 				for(var l in fricat)
 				{
 					if(!(l in usercat))
@@ -113,7 +132,9 @@ $(document).ready(function() {
 				else
 				{
 					getIDS(likePool);
-				}			
+				}
+
+							
 			});
 		}
 		
@@ -122,7 +143,7 @@ $(document).ready(function() {
 		//to obtain the suggestions
 		function getProfileImage(id,name) {
 		 
-			var $photo = $('.photo');
+			var $photo = $('#disp');
 		 
 		 
 		 
@@ -142,40 +163,31 @@ $(document).ready(function() {
 				//$(this).css('color', 'blue');
 				var fName = $(this).attr('class').split("-");
 				fName = fName[0]+" "+fName[1];
-				$('#userlikes').empty();
-				$('#userlikes').append("<h3>User Likes!!!</h3>");
-				$('#friendlikes').empty();
-				$('#friendlikes').append("<h3>Friend Likes!!!</h3>");
-				$('#cat').empty();
-				$('#cat').append("<h3>Suggestions!!</h3>");
-				$('#imp').empty();
-				$('#imp').append("<h3>Selected Information!!!</h3>");
+				$('#message').empty();
+				$('#dialog').dialog({title:"Suggestions for "+fName+""});
 				console.log(fName);
 				console.log(this.id);
+				var category = ["movie","tv show","musician/band"];
+				var index = 0;
 				$('#message').show();
+				getUserLikes(id,name,category[index]);
+				$('#message').append("<li><strong>"+category[index].toUpperCase()+"</li></strong>");
+				
 				$(function() {
 				$( "#dialog" ).dialog({
 				  resizable: true,
-				  height:200,
+				  height:300,
 				  width: 450,
 				  modal: true,
 				  buttons: {
-					"Movie": function() {
-						getUserLikes(id,name,'movie');
-						$('#message').hide();
-						$("html, body").animate({ scrollTop:0 },"slow");
-					  $( this ).dialog( "close" );
+					"Next Category": function() {
+						index = (index+1)%3;
+						$('#message').empty();
+						$('#message').append("<li><strong>"+category[index].toUpperCase()+"</strong></li>");
+						getUserLikes(id,name,category[index]);
 					},
-					"Tv Show": function() {
-						getUserLikes(id,name,'tv show');
-						$('#message').hide();
-						$("html, body").animate({ scrollTop:0 },"slow");
-					  $( this ).dialog( "close" );
-					  },
-					  "Musician/Band": function() {
-						getUserLikes(id,name,'musician/band');
-						$('#message').hide();
-						$("html, body").animate({ scrollTop:0 },"slow");
+					Cancel: function() {
+					  $('#message').hide();
 					  $( this ).dialog( "close" );
 					}
 				}
@@ -201,6 +213,11 @@ $(document).ready(function() {
 			FB.api(
 				'/me/friends',
 				function (response) {
+					var alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+					var arrLinks = {};
+					for(var a in alphabet){
+						arrLinks[a] = false;
+					}
 				  if (response && !response.error) {
 					console.log(response.data[0]["name"]);
 					var friendsArray = response.data;
@@ -208,6 +225,17 @@ $(document).ready(function() {
 					for(var i=0; i<friendsArray.length; i++)
 					{
 						var name = friendsArray[i]["name"];
+						var fchar = name.substring(0,1).toLowerCase();
+						if(!arrLinks[fchar]){
+							arrLinks[fchar] = true;
+							$('#disp').append('<a name="index'+fchar+'"></a>');
+							var index = alphabet.indexOf(fchar)-1;
+							while(index>0 && !arrLinks[alphabet[index]]){
+								arrLinks[alphabet[index]] = true;
+								$('#disp').append('<a name="index'+alphabet[index]+'"></a>');
+								index = index-1;
+							}
+						}
 						var id = friendsArray[i]["id"];
 						getProfileImage(id,name);
 					}
@@ -220,9 +248,8 @@ $(document).ready(function() {
 		{
 			FB.api('/me/likes',function(response){
 				if (response && !response.error) {
-					$('#imp').append("<h3>" + friendName + "</h3>");
-					getLikes(id,friendName,response.data,category);
 					console.log(response);
+					getLikes(id,friendName,response.data,category);
 				}
 			});
 		}
