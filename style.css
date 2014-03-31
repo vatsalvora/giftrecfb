@@ -1,7 +1,3 @@
-body{
-	background-color: #FFCC66;
-
-}
 p{
 	font-size:20px;
 }
@@ -32,14 +28,17 @@ li{
 	color: #0000CC;
 }
 #disp {
-    text-align: center;
+    margin: auto;
+	width: 880px;
 }
 figure {
     display: inline-block;
 	padding: 5px;
+	width:350px;
 }
 figcaption {
-    margin: 10px 0 0 0;
+	float:left;
+    margin-left: 10px;
     font-variant: small-caps;
     font-family: Arial;
     font-weight: bold;
@@ -53,6 +52,7 @@ img:hover {
     -o-transform: scale(1.1);
 }
 img {
+	float:left;
     transition: transform 0.2s;
     -webkit-transition: -webkit-transform 0.2s;
     -moz-transition: -moz-transform 0.2s;

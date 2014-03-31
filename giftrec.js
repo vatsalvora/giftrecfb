@@ -156,7 +156,7 @@ $(document).ready(function() {
 			
 			//Using HTML5 figure tag
 		   $photo.append('<figure id='+id+' class='+ nameCombined +'><img src="' + profileImage + 
-		   '" height="90" width="90" alt="'+name+' is loading!"><figcaption>'+name+'</figcaption></figure>');
+		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption>'+name+'</figcaption></figure>');
 
 		   //The function for on click
 		   $( '#'+id ).bind('click',function() {
