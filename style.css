@@ -58,7 +58,7 @@ figcaption {
     font-weight: bold;
 	color: #0000CC;
 }
-figcaption :hover{
+figcaption:hover{
 	text-decoration:underline;
 }
 

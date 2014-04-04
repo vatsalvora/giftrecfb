@@ -13,7 +13,7 @@ $(document).ready(function() {
 			FB.init({
 			  appId: '799066233444105',
 			});
-			FB.login(function(){}, {scope: 'user_likes,user_friends,friends_likes'});			
+			FB.login(function(){FB.getLoginStatus(updateStatusCallback);}, {scope: 'user_likes,user_friends,friends_likes'});			
 			$('#loginbutton').removeAttr('disabled');
 			FB.getLoginStatus(updateStatusCallback);
 		  });
@@ -137,35 +137,13 @@ $(document).ready(function() {
 							
 			});
 		}
-		
-		//This function obtains the facebook profile picture
-		//for all the friends and binds the image with a function
-		//to obtain the suggestions
-		function getProfileImage(id,name) {
-		 
-			var $photo = $('#disp');
-		 
-		 
-		 
-			var profileImage = 'https://graph.facebook.com/'+id+'/picture?width=90&height=90'; //remove https to avoid any cert issues
-	 
-			 //add random number to reduce the frequency of cached images showing
-			//console.log(name);
-			var nameArray = name.split(" ");
-			var nameCombined = nameArray[0]+"-"+nameArray[1];
-			
-			//Using HTML5 figure tag
-		   $photo.append('<figure id='+id+' class='+ nameCombined +'><img src="' + profileImage + 
-		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption>'+name+'</figcaption></figure>');
-
-		   //The function for on click
-		   $( '#'+id ).bind('click',function() {
-				//$(this).css('color', 'blue');
-				var fName = $(this).attr('class').split("-");
-				fName = fName[0]+" "+fName[1];
+		//The function for on click to bring up
+		//dialog box and call the functions for 
+		// the api(s)
+		function click(id, name){
 				$('#message').empty();
-				$('#dialog').dialog({title:"Suggestions for "+fName+""});
-				console.log(fName);
+				$('#dialog').dialog({title:"Suggestions for "+name+""});
+				console.log(name);
 				console.log(this.id);
 				var category = ["movie","tv show","musician/band"];
 				var index = 0;
@@ -173,7 +151,6 @@ $(document).ready(function() {
 				getUserLikes(id,name,category[index]);
 				$('#message').append("<li><strong>"+category[index].toUpperCase()+"</li></strong>");
 				
-				$(function() {
 				$( "#dialog" ).dialog({
 				  resizable: true,
 				  height:300,
@@ -192,8 +169,31 @@ $(document).ready(function() {
 					}
 				}
 				});
-				});
-			  });
+		}
+		//This function obtains the facebook profile picture
+		//for all the friends and binds the image with a function
+		//to obtain the suggestions
+		function getProfileImage(id,name) {
+		 
+			var $photo = $('#disp');
+		 
+		 
+		 
+			var profileImage = 'https://graph.facebook.com/'+id+'/picture?width=90&height=90'; //remove https to avoid any cert issues
+	 
+			 //add random number to reduce the frequency of cached images showing
+			//console.log(name);
+			var nameArray = name.split(" ");
+			var nameCombined = nameArray[0]+"-"+nameArray[1];
+			
+			//Using HTML5 figure tag
+		   $photo.append('<figure class='+ nameCombined +'><img id='+id+' src="' + profileImage + 
+		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption id="name'+id+'">'+name+'</figcaption></figure>');
+
+
+			$( '#'+id ).bind('click',function(){click(id, name)});
+			$( '#name'+id ).bind('click',function(){click(id, name)});
+		
 		}
 		
 		//This function is a comparator for 
