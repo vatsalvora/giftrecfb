@@ -137,10 +137,31 @@ $(document).ready(function() {
 							
 			});
 		}
-		//The function for on click to bring up
-		//dialog box and call the functions for 
-		// the api(s)
-		function click(id, name){
+
+		//This function obtains the facebook profile picture
+		//for all the friends and binds the image with a function
+		//to obtain the suggestions
+		function getProfileImage(id,name) {
+		 
+			var $photo = $('#disp');
+		 
+		 
+		 
+			var profileImage = 'https://graph.facebook.com/'+id+'/picture?width=90&height=90'; //remove https to avoid any cert issues
+	 
+			 //add random number to reduce the frequency of cached images showing
+			//console.log(name);
+			var nameArray = name.split(" ");
+			var nameCombined = nameArray[0]+"-"+nameArray[1];
+			
+			//Using HTML5 figure tag
+		   $photo.append('<figure><img class='+ nameCombined +' src="' + profileImage + 
+		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption class='+ nameCombined +'>'+name+'</figcaption></figure>');
+
+			//The function for on click to bring up
+			//dialog box and call the functions for 
+			// the api(s)
+			$( '.'+nameCombined ).bind('click',function(){
 				$('#message').empty();
 				$('#dialog').dialog({title:"Suggestions for "+name+""});
 				console.log(name);
@@ -169,30 +190,7 @@ $(document).ready(function() {
 					}
 				}
 				});
-		}
-		//This function obtains the facebook profile picture
-		//for all the friends and binds the image with a function
-		//to obtain the suggestions
-		function getProfileImage(id,name) {
-		 
-			var $photo = $('#disp');
-		 
-		 
-		 
-			var profileImage = 'https://graph.facebook.com/'+id+'/picture?width=90&height=90'; //remove https to avoid any cert issues
-	 
-			 //add random number to reduce the frequency of cached images showing
-			//console.log(name);
-			var nameArray = name.split(" ");
-			var nameCombined = nameArray[0]+"-"+nameArray[1];
-			
-			//Using HTML5 figure tag
-		   $photo.append('<figure class='+ nameCombined +'><img id='+id+' src="' + profileImage + 
-		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption id="name'+id+'">'+name+'</figcaption></figure>');
-
-
-			$( '#'+id ).bind('click',function(){click(id, name)});
-			$( '#name'+id ).bind('click',function(){click(id, name)});
+			});
 		
 		}
 		
