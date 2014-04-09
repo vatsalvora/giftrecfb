@@ -58,7 +58,7 @@ $(document).ready(function() {
 									{
 										if(added[name]!= true){
 											added[name] = true;
-											$('#message').append('<li style="display:block;">' + name + '</li>');
+											$('#message').append('<a href="http://www.imdb.com/title/tt'+data.objects[index].film_id+'/"><li style="display:block;">' + name + '</li></a>');
 										}
 									}
 								});
@@ -74,16 +74,18 @@ $(document).ready(function() {
 			var added = {};
 			for(var l in list){
 				$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getsimilar&artist='+l+'&api_key=8a981fbe76b27b7e1fd32e9248a0454b', function(data){
-					if(data.similarartists.artist.length>0)
+					if(typeof data.similarartists.artist != 'undefined')
 					{
 						var index = Math.floor((data.similarartists.artist.length-1)*Math.random());
 						var name = data.similarartists.artist[index].name;
+						var url = data.similarartists.artist[index].url;
 						if(typeof name != 'undefined')
 						{
 							if(added[name] != true)
 							{
 								added[name] = true;
-								$('#message').append('<li style="display:block;">' + name + '</li>');
+								console.log(data);
+								$('#message').append('<a href="https://'+ url +'"><li style="display:block;">' + name + '</li></a>');
 							}
 						}
 					}
@@ -98,6 +100,7 @@ $(document).ready(function() {
 					var usercat = {};
 				var fricat = {};
 				var likePool = {};
+				var count = 0;
 				for(var j=0; j<list.length; j++)
 				{
 					$('#userlikes').append("<li>"+ list[j]["name"] + "</li>");
@@ -105,6 +108,7 @@ $(document).ready(function() {
 					{
 						usercat[list[j]["name"]] = true;
 						likePool[list[j]["name"]] = true;
+						count++;
 					}
 				}
 				$('#friendlikes').append("<h3>"+ name + "</h3>");
@@ -115,6 +119,7 @@ $(document).ready(function() {
 					{
 						fricat[response.data[k]["name"]] = true;
 						likePool[response.data[k]["name"]] = true;
+						count++;
 					}
 				}
 				for(var l in fricat)
@@ -125,7 +130,12 @@ $(document).ready(function() {
 					}
 				}
 				console.log(likePool);
-				if(category==='musician/band')
+				console.log(count);
+				console.log(category);
+				if(count<1){
+					$('#message').append('<li style="display:block;">No Data available for Recommendation!</li>');
+				}
+				else if(category==='musician/band')
 				{
 					getSimilarArtist(likePool);
 				}
@@ -149,19 +159,15 @@ $(document).ready(function() {
 		 
 			var profileImage = 'https://graph.facebook.com/'+id+'/picture?width=90&height=90'; //remove https to avoid any cert issues
 	 
-			 //add random number to reduce the frequency of cached images showing
-			//console.log(name);
-			var nameArray = name.split(" ");
-			var nameCombined = nameArray[0]+"-"+nameArray[1];
-			
+			 			
 			//Using HTML5 figure tag
-		   $photo.append('<figure><img class='+ nameCombined +' src="' + profileImage + 
-		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption class='+ nameCombined +'>'+name+'</figcaption></figure>');
+		   $photo.append('<figure><img class='+ id +' src="' + profileImage + 
+		   '" height="90px" width="90px" alt="'+name+' is loading!"><figcaption class='+ id +'>'+name+'</figcaption></figure>');
 
 			//The function for on click to bring up
 			//dialog box and call the functions for 
 			// the api(s)
-			$( '.'+nameCombined ).bind('click',function(){
+			$( '.'+id+'' ).bind('click',function(){
 				$('#message').empty();
 				$('#dialog').dialog({title:"Suggestions for "+name+""});
 				console.log(name);
@@ -178,16 +184,20 @@ $(document).ready(function() {
 				  width: 450,
 				  modal: true,
 				  buttons: {
-					"Next Category": function() {
+					"Previous": function() {
+					  $('#message').show();
+					  index = (index-1+category.length)%3;
+					  $('#message').empty();
+					  $('#message').append("<li><strong>"+category[index].toUpperCase()+"</strong></li>");
+					  getUserLikes(id,name,category[index]);
+					},
+					"Next": function() {
+						$('#message').show();
 						index = (index+1)%3;
 						$('#message').empty();
 						$('#message').append("<li><strong>"+category[index].toUpperCase()+"</strong></li>");
 						getUserLikes(id,name,category[index]);
-					},
-					Cancel: function() {
-					  $('#message').hide();
-					  $( this ).dialog( "close" );
-					}
+					}					
 				}
 				});
 			});

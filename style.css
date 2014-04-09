@@ -10,7 +10,7 @@ li .ui-selected {
 	background: #0000CC; color: white;
 }
 .ui-dialog-titlebar{
-	background: #FFCC66;
+	background:#FF6600;
 }
 .ui-dialog-title{
 	color: #0000CC;
@@ -59,10 +59,14 @@ figcaption {
 	color: #0000CC;
 }
 figcaption:hover{
+	cursor:pointer;
+    	cursor:hand;
 	text-decoration:underline;
 }
 
 img:hover {
+    cursor:pointer;
+    cursor:hand;
     transform: scale(1.1);
     -ms-transform: scale(1.1);
     -webkit-transform: scale(1.1);
