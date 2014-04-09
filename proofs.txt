@@ -1,7 +1,0 @@
-Problem 1 Prove SSA for right triangles: If AB »= DE; AC »= DF and if Bb = 90o and Eb = 90o
-;
-then 4ABC »= 4DEF.
-Solution: Extend BC on the side of B and take G, such that BG »= EF: Then AB »=
-DE; GB \
-»= EF and ABG \»= DEF ; \ whence, by ASA, 4ABG »= 4DEF : Thus AG »= AC; whence
-DF E »= AGB \»= ACB \and, therefore, 4ABC »= 4DEF ; by ASA.

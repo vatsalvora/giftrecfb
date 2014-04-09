@@ -1,5 +1,0 @@
-Proof: first suppose AM > BC 
-There is a point D between A and B such that BC = BD. By the isoceles triangle theorem, angle BCD is congruent to angle BDC. 
-Since D is between A and B, the ray CD is between the rays CA and CB (by a previous TH).  So the angle addition postulate applies,
-and the measure of angle ACB = the measure of Angle ACD plus the angle DCB.
-it follows that the measure of angle ACB > the measure of angle DCB.
