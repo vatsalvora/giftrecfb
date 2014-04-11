@@ -15,7 +15,6 @@ $(document).ready(function() {
 			});
 			FB.login(function(){FB.getLoginStatus(updateStatusCallback);}, {scope: 'user_likes,user_friends,friends_likes'});			
 			$('#loginbutton').removeAttr('disabled');
-			FB.getLoginStatus(updateStatusCallback);
 		  });
 		 
       });
@@ -26,13 +25,12 @@ $(document).ready(function() {
 		$('#friendlikes').hide();
 		$('#userlikes').hide();
 		$('#disp').hide();
+		var fbRecs = new FriendLikes();
 		getFriends();
 		$('#disp').delay(1500).fadeIn("slow", function(){
 			$('#topNav').show();
-			$('#botNav').show();
 			$('#loading').hide();
 		});
-		console.log("Done!");
 		//var friendName = prompt("Name of Friend?").toLowerCase();
 		
 		//This function is for getting movie suggestions from 
@@ -84,7 +82,7 @@ $(document).ready(function() {
 							if(added[name] != true)
 							{
 								added[name] = true;
-								console.log(data);
+								//console.log(data);
 								$('#message').append('<a href="https://'+ url +'"><li style="display:block;">' + name + '</li></a>');
 							}
 						}
@@ -96,7 +94,7 @@ $(document).ready(function() {
 		//likes for the friend the user selected
 		function getLikes(id,name,list,category){
 			FB.api('/'+id+'/likes', function(response){
-					console.log(response);
+					//console.log(response);
 					var usercat = {};
 				var fricat = {};
 				var likePool = {};
@@ -129,9 +127,9 @@ $(document).ready(function() {
 						//$('#cat').append("<li>"+ l + "</li>");
 					}
 				}
-				console.log(likePool);
-				console.log(count);
-				console.log(category);
+				//console.log(likePool);
+				//console.log(count);
+				//console.log(category);
 				if(count<1){
 					$('#message').append('<li style="display:block;">No Data available for Recommendation!</li>');
 				}
@@ -169,14 +167,19 @@ $(document).ready(function() {
 			// the api(s)
 			$( '.'+id+'' ).bind('click',function(){
 				$('#message').empty();
+				$('#friends').empty();
 				$('#dialog').dialog({title:"Suggestions for "+name+""});
-				console.log(name);
-				console.log(this.id);
+				//console.log(name);
+				//console.log(this.id);
 				var category = ["movie","tv show","musician/band"];
 				var index = 0;
 				$('#message').show();
-				getUserLikes(id,name,category[index]);
+				$('#friends').show();
 				$('#message').append("<li><strong>"+category[index].toUpperCase()+"</li></strong>");
+				$('#friends').append("<li><strong>Friends Suggestions</li></strong>");
+				fbRecs.appendToDiv(category[index]);
+				getUserLikes(id,name,category[index]);
+
 				
 				$( "#dialog" ).dialog({
 				  resizable: true,
@@ -186,16 +189,25 @@ $(document).ready(function() {
 				  buttons: {
 					"Previous": function() {
 					  $('#message').show();
+					  $('#friends').show();
 					  index = (index-1+category.length)%3;
 					  $('#message').empty();
+					  $('#friends').empty();
 					  $('#message').append("<li><strong>"+category[index].toUpperCase()+"</strong></li>");
+					  $('#friends').append("<li><strong>Friends Suggestions</li></strong>");
+					  fbRecs.appendToDiv(category[index]);
 					  getUserLikes(id,name,category[index]);
+					  
 					},
 					"Next": function() {
 						$('#message').show();
+						$('#friends').show();
 						index = (index+1)%3;
 						$('#message').empty();
+						$('#friends').empty();
 						$('#message').append("<li><strong>"+category[index].toUpperCase()+"</strong></li>");
+						$('#friends').append("<li><strong>Friends Suggestions</li></strong>");
+						fbRecs.appendToDiv(category[index]);
 						getUserLikes(id,name,category[index]);
 					}					
 				}
@@ -227,7 +239,7 @@ $(document).ready(function() {
 						arrLinks[a] = false;
 					}
 				  if (response && !response.error) {
-					console.log(response.data[0]["name"]);
+					//console.log(response.data[0]["name"]);
 					var friendsArray = response.data;
 					friendsArray.sort(compare);
 					for(var i=0; i<friendsArray.length; i++)
@@ -246,6 +258,7 @@ $(document).ready(function() {
 						}
 						var id = friendsArray[i]["id"];
 						getProfileImage(id,name);
+						storeFriendLikes(id,name);
 					}
 				  }
 				  });
@@ -256,9 +269,122 @@ $(document).ready(function() {
 		{
 			FB.api('/me/likes',function(response){
 				if (response && !response.error) {
-					console.log(response);
 					getLikes(id,friendName,response.data,category);
 				}
 			});
+		}
+		
+		function storeFriendLikes(id,name)
+		{
+			FB.api('/'+id+'/likes',function(response){
+				if (response && !response.error) {
+					for(var k=0; k<response.data.length; k++)
+					{
+						var cat = response.data[k]["category"].toLowerCase();
+						if(typeof fbRecs.categories[cat] != 'undefined')
+						{
+							var itemName = response.data[k]["name"];
+							if(typeof fbRecs.categories[cat][itemName] != 'undefined'){
+								fbRecs.categories[cat][itemName].friendNames.push(name);
+								var count = (fbRecs.categories[cat][itemName].count) + 1;
+								fbRecs.categories[cat][itemName].count = count;
+							}
+							else
+							{
+								fbRecs.categories[cat][itemName] = {};
+								fbRecs.categories[cat][itemName].friendNames = [name];
+								fbRecs.categories[cat][itemName].count = 1;
+							}
+						}
+					}					
+				}
+			});
+		}
+		
+		function FriendLikes(){
+			this.categories = {"movie":{},"tv show":{},"musician/band":{}};
+			this.sorted = false;
+			this.sort = function(){
+				var sortable = [];
+				for (var item in this.categories["movie"])
+					  sortable.push([item, this.categories["movie"][item]["count"], this.categories["movie"][item]["friendNames"]]);
+				sortable.sort(function(a, b) {return b[1] - a[1]});
+				this.categories["movie"].sorted = sortable;
+				var sortableTV = [];
+				for (var item in this.categories["tv show"])
+					  sortableTV.push([item, this.categories["tv show"][item]["count"], this.categories["tv show"][item]["friendNames"]]);
+				sortableTV.sort(function(a, b) {return b[1] - a[1]});
+				this.categories["tv show"].sorted = sortableTV;
+				var sortableMusic = [];
+				for (var item in this.categories["musician/band"])
+					  sortableMusic.push([item, this.categories["musician/band"][item]["count"], this.categories["musician/band"][item]["friendNames"]]);
+				sortableMusic.sort(function(a, b) {return b[1] - a[1]});
+				this.categories["musician/band"].sorted = sortableMusic;
+			};
+			this.appendToDiv = function(category){
+				if(this.sorted === false){
+					this.sort();
+					this.sorted = true;
+				}
+				if(category != 'musician/band')
+				{
+					for(var i=0; i<3; i++)
+					{
+						var name = this.categories[category].sorted[i][0];
+						var sortedArray = this.categories[category].sorted[i];
+						$.getJSON('http://www.omdbapi.com/?t=' + name, (function(sortedArray) { return function(data){
+							if(data.Response === "True")
+							{
+								var friendNames = sortedArray[2];
+								//friendNames.sort();
+								var displayNames = 'Liked by ';
+								for(var j=0; j<friendNames.length-1; j++)
+								{
+									displayNames += friendNames[j] + ' , ';
+								}
+								displayNames += friendNames[friendNames.length-1];
+								$('#friends').append('<a href="http://www.imdb.com/title/'+data.imdbID+'/" title="'+ displayNames +'"><li style="display:block;">' + data.Title + '</li></a>');
+							}
+						};})(sortedArray));
+					}
+				}
+				else
+				{
+					for(var i=0; i<3; i++)
+					{
+						var name = this.categories[category].sorted[i][0];
+						var sortedArray = this.categories[category].sorted[i];
+						$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getinfo&artist='+name+'&api_key=8a981fbe76b27b7e1fd32e9248a0454b', (function(sortedArray) { return function(data){
+							if(typeof data.artist != 'undefined')
+							{
+								var artname = data.artist.name;
+								var url = data.artist.url.substr(7);
+								var friendNames = sortedArray[2];
+								//friendNames.sort();
+								var displayNames = 'Liked by ';
+								for(var j=0; j<friendNames.length-1; j++)
+								{
+									displayNames += friendNames[j] + ' , ';
+								}
+								displayNames += friendNames[friendNames.length-1];
+								$('#friends').append('<a href="https://'+ url +'" title="' + displayNames +'"><li style="display:block;">' + artname + '</li></a>');
+							}
+							else{
+								var artname = sortedArray[0];
+								var friendNames = sortedArray[2];
+								//friendNames.sort();
+								var displayNames = 'Liked by ';
+								for(var j=0; j<friendNames.length-1; j++)
+								{
+									displayNames += friendNames[j] + ' , ';
+								}
+								displayNames += friendNames[friendNames.length-1];
+								$('#friends').append('<span title="' + displayNames +'"><li style="display:block;">' + artname + '</li></span>');
+							
+							}
+						};})(sortedArray));
+					}
+				}
+			};
 		}
 	}

@@ -36,9 +36,8 @@ body{
 }
 #topNav{
 	background:white;
-}
-#botNav{
-	background:white;
+	position: fixed;
+	margin-left: 25%;
 }
 #disp {
     margin: auto;
