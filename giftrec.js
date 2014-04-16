@@ -112,7 +112,7 @@ $(document).ready(function() {
 					{
 						likePool[response.data[k]["name"]] = true;
 						count++;
-						k += Math.floor(100*Math.random());
+						k += Math.floor(10*Math.random());
 					}
 
 
