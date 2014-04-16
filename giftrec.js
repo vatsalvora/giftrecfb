@@ -100,9 +100,11 @@ $(document).ready(function() {
 					{
 						likePool[list[j]["name"]] = true;
 						count++;
-					}
-					j += Math.floor(10*Math.random());
+						j += Math.floor(100*Math.random());
 
+					}
+					
+					
 				}
 				for(var k=0; k<response.data.length; k++)
 				{
@@ -110,8 +112,9 @@ $(document).ready(function() {
 					{
 						likePool[response.data[k]["name"]] = true;
 						count++;
+						k += Math.floor(100*Math.random());
 					}
-					k += Math.floor(10*Math.random());
+
 
 				}
 				if(count<1){
