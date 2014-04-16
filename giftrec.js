@@ -22,8 +22,6 @@ $(document).ready(function() {
 	  // and the FB api has been loaded
 	  function updateStatusCallback(){
 		console.log('Welcome!  Fetching your information.... ');
-		$('#friendlikes').hide();
-		$('#userlikes').hide();
 		$('#disp').hide();
 		var fbRecs = new FriendLikes();
 		getFriends();
@@ -93,43 +91,29 @@ $(document).ready(function() {
 		//This function is for getting the Facebook User
 		//likes for the friend the user selected
 		function getLikes(id,name,list,category){
-			FB.api('/'+id+'/likes', function(response){
-					//console.log(response);
-					var usercat = {};
-				var fricat = {};
+			FB.api('/'+id+'/likes?limit=200', function(response){
 				var likePool = {};
 				var count = 0;
 				for(var j=0; j<list.length; j++)
 				{
-					$('#userlikes').append("<li>"+ list[j]["name"] + "</li>");
 					if(list[j]["category"].toLowerCase()===category)
 					{
-						usercat[list[j]["name"]] = true;
 						likePool[list[j]["name"]] = true;
 						count++;
 					}
+					j += Math.floor(10*Math.random());
+
 				}
-				$('#friendlikes').append("<h3>"+ name + "</h3>");
 				for(var k=0; k<response.data.length; k++)
 				{
-					$('#friendlikes').append("<li>"+ response.data[k]["name"] + "</li>");
 					if(response.data[k]["category"].toLowerCase()===category)
 					{
-						fricat[response.data[k]["name"]] = true;
 						likePool[response.data[k]["name"]] = true;
 						count++;
 					}
+					k += Math.floor(10*Math.random());
+
 				}
-				for(var l in fricat)
-				{
-					if(!(l in usercat))
-					{
-						//$('#cat').append("<li>"+ l + "</li>");
-					}
-				}
-				//console.log(likePool);
-				//console.log(count);
-				//console.log(category);
 				if(count<1){
 					$('#message').append('<li style="display:block;">No Data available for Recommendation!</li>');
 				}
@@ -186,6 +170,7 @@ $(document).ready(function() {
 				  height:300,
 				  width: 450,
 				  modal: true,
+			      closeOnEscape: true,
 				  buttons: {
 					"Previous": function() {
 					  $('#message').show();
@@ -197,6 +182,7 @@ $(document).ready(function() {
 					  $('#friends').append("<li><strong>Friends Suggestions</li></strong>");
 					  fbRecs.appendToDiv(category[index]);
 					  getUserLikes(id,name,category[index]);
+					  console.log(fbRecs);
 					  
 					},
 					"Next": function() {
@@ -209,6 +195,7 @@ $(document).ready(function() {
 						$('#friends').append("<li><strong>Friends Suggestions</li></strong>");
 						fbRecs.appendToDiv(category[index]);
 						getUserLikes(id,name,category[index]);
+						console.log(fbRecs);
 					}					
 				}
 				});
@@ -258,8 +245,8 @@ $(document).ready(function() {
 						}
 						var id = friendsArray[i]["id"];
 						getProfileImage(id,name);
-						storeFriendLikes(id,name);
 					}
+					storeFriendLikes(friendsArray);
 				  }
 				  });
 		}
@@ -267,65 +254,98 @@ $(document).ready(function() {
 		//current user
 		function getUserLikes(id,friendName,category)
 		{
-			FB.api('/me/likes',function(response){
+			FB.api('/me/likes?limit=200',function(response){
 				if (response && !response.error) {
 					getLikes(id,friendName,response.data,category);
 				}
 			});
 		}
 		
-		function storeFriendLikes(id,name)
+		function storeFriendLikes(friendsArray)
 		{
-			FB.api('/'+id+'/likes',function(response){
-				if (response && !response.error) {
-					for(var k=0; k<response.data.length; k++)
+			FB.api('/me/likes?limit=200',function(userlikes){
+				if (userlikes && !userlikes.error) {
+					var compareLikes = {};
+					for(var p=0; p<userlikes.data.length; p++)
 					{
-						var cat = response.data[k]["category"].toLowerCase();
-						if(typeof fbRecs.categories[cat] != 'undefined')
-						{
-							var itemName = response.data[k]["name"];
-							if(typeof fbRecs.categories[cat][itemName] != 'undefined'){
-								fbRecs.categories[cat][itemName].friendNames.push(name);
-								var count = (fbRecs.categories[cat][itemName].count) + 1;
-								fbRecs.categories[cat][itemName].count = count;
+						compareLikes[userlikes.data[p]["name"]] = true;
+					}
+					//console.log(compareLikes);
+					for(var i=0; i<friendsArray.length; i++)
+					{	
+						var name = friendsArray[i]["name"];
+						var id = friendsArray[i]["id"];
+						FB.api('/'+id+'/likes?limit=200', (function(name) { return function(response){
+							if (response && !response.error) {
+								for(var k=0; k<response.data.length; k++)
+								{
+									var cat = response.data[k]["category"].toLowerCase();
+									if(typeof fbRecs.categories[cat] != 'undefined')
+									{
+										if(!(compareLikes[response.data[k]["name"]] === true))
+										{
+											var itemName = response.data[k]["name"];
+											if(typeof fbRecs.categories[cat][itemName] != 'undefined'){
+												if(!(fbRecs.categories[cat][itemName].friendNames[name] === true))
+												{
+													fbRecs.categories[cat][itemName].friendNames[name] = true;
+													var count = (fbRecs.categories[cat][itemName].count) + 1;
+													fbRecs.categories[cat][itemName].count = count;
+												}
+											}
+											else
+											{
+												fbRecs.categories[cat][itemName] = {};
+												fbRecs.categories[cat][itemName].friendNames = {};
+												fbRecs.categories[cat][itemName].friendNames[name] = true;
+												fbRecs.categories[cat][itemName].count = 1;
+											}
+										}
+									}
+								}					
 							}
-							else
-							{
-								fbRecs.categories[cat][itemName] = {};
-								fbRecs.categories[cat][itemName].friendNames = [name];
-								fbRecs.categories[cat][itemName].count = 1;
-							}
-						}
-					}					
+						}})(name));
+					}
 				}
 			});
 		}
 		
 		function FriendLikes(){
 			this.categories = {"movie":{},"tv show":{},"musician/band":{}};
-			this.sorted = false;
 			this.sort = function(){
 				var sortable = [];
 				for (var item in this.categories["movie"])
-					  sortable.push([item, this.categories["movie"][item]["count"], this.categories["movie"][item]["friendNames"]]);
+				{
+					  if(item != 'sorted')
+					  {
+						sortable.push([item, this.categories["movie"][item]["count"], this.categories["movie"][item]["friendNames"]]);
+					  }
+				}
 				sortable.sort(function(a, b) {return b[1] - a[1]});
 				this.categories["movie"].sorted = sortable;
 				var sortableTV = [];
 				for (var item in this.categories["tv show"])
+				{
+					if(item != 'sorted')
+					{
 					  sortableTV.push([item, this.categories["tv show"][item]["count"], this.categories["tv show"][item]["friendNames"]]);
+					}
+				}
 				sortableTV.sort(function(a, b) {return b[1] - a[1]});
 				this.categories["tv show"].sorted = sortableTV;
 				var sortableMusic = [];
 				for (var item in this.categories["musician/band"])
+				{
+					if(item != 'sorted')
+					{
 					  sortableMusic.push([item, this.categories["musician/band"][item]["count"], this.categories["musician/band"][item]["friendNames"]]);
+					}
+				}
 				sortableMusic.sort(function(a, b) {return b[1] - a[1]});
 				this.categories["musician/band"].sorted = sortableMusic;
 			};
 			this.appendToDiv = function(category){
-				if(this.sorted === false){
-					this.sort();
-					this.sorted = true;
-				}
+				this.sort();
 				if(category != 'musician/band')
 				{
 					for(var i=0; i<3; i++)
@@ -335,8 +355,9 @@ $(document).ready(function() {
 						$.getJSON('http://www.omdbapi.com/?t=' + name, (function(sortedArray) { return function(data){
 							if(data.Response === "True")
 							{
-								var friendNames = sortedArray[2];
-								//friendNames.sort();
+								var friendObj = sortedArray[2];
+								var friendNames = [];
+								for( var f in friendObj) friendNames.push(f);
 								var displayNames = 'Liked by ';
 								for(var j=0; j<friendNames.length-1; j++)
 								{
@@ -359,8 +380,9 @@ $(document).ready(function() {
 							{
 								var artname = data.artist.name;
 								var url = data.artist.url.substr(7);
-								var friendNames = sortedArray[2];
-								//friendNames.sort();
+								var friendObj = sortedArray[2];
+								var friendNames = [];
+								for( var f in friendObj) friendNames.push(f);
 								var displayNames = 'Liked by ';
 								for(var j=0; j<friendNames.length-1; j++)
 								{
@@ -371,8 +393,9 @@ $(document).ready(function() {
 							}
 							else{
 								var artname = sortedArray[0];
-								var friendNames = sortedArray[2];
-								//friendNames.sort();
+								var friendObj = sortedArray[2];
+								var friendNames = [];
+								for( var f in friendObj) friendNames.push(f);
 								var displayNames = 'Liked by ';
 								for(var j=0; j<friendNames.length-1; j++)
 								{
