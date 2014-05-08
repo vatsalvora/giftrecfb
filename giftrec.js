@@ -11,7 +11,7 @@ $(document).ready(function() {
         $.ajaxSetup({ cache: true });
 		  $.getScript('//connect.facebook.net/en_UK/all.js', function(){
 			FB.init({
-			  appId: '799066233444105',
+			  appId: '[Enter Facebook APP ID]',
 			});
 			FB.login(function(){FB.getLoginStatus(updateStatusCallback);}, {scope: 'user_likes,user_friends,friends_likes'});			
 			$('#loginbutton').removeAttr('disabled');
@@ -43,7 +43,7 @@ $(document).ready(function() {
 					{
 						var imdbID = json_data.imdbID.substr(2);
 						//Get the movie recommendations from filmmaster using the imdb ids
-						$.getJSON("http://ec2-54-84-252-222.compute-1.amazonaws.com/api.php",  {id: imdbID}, function(data){
+						$.getJSON("[URL TO PHP SCRIPT]/api.php",  {id: imdbID}, function(data){
 							if(data.objects.length>0)
 							{
 								var index = Math.floor((data.objects.length-1)*Math.random()); //Randomize selections from the suggestions
@@ -69,7 +69,7 @@ $(document).ready(function() {
 		var getSimilarArtist = function(list){
 			var added = {};
 			for(var l in list){
-				$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getsimilar&artist='+l+'&api_key=8a981fbe76b27b7e1fd32e9248a0454b', function(data){
+				$.getJSON('http://ws.audioscrobbler.com/2.0/?format=json&method=artist.getsimilar&artist='+l+'&api_key=[Enter last.fm API KEY]', function(data){
 					if(typeof data.similarartists.artist != 'undefined')
 					{
 						var index = Math.floor((data.similarartists.artist.length-1)*Math.random());

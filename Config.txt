@@ -1,0 +1,26 @@
+Configuration Manual
+
+1. Configure and set up a server
+Save the JavaScript, PHP, HTML, and CSS file on a Linux server running
+Apache webserver (LAMP). Make sure the PHP version is the latest version and
+that your server firewall does not block PHP from using cURL.
+
+2. Set up Scripts with Access Keys
+In api.php
+Line 4: Enter User name for Test Server
+Line 5: Enter Password for Test Server
+Contact borys@filmaster.com in order to 
+recive the username and password
+
+In giftrec.js
+Line 14: Enter The APP ID recieved from registering an application 
+		with Facebook at developers.facebook.com. Remember to register
+		the URL to your webserver with Facebook also.
+Line 46: Enter the URL to where the PHP script is running
+Line 72: Enter the API key recieved from last.fm by registering at
+		 http://www.last.fm/api
+		 
+3. Go to your home page on your webserver to see the web application
+
+To see a working version: 
+http://www.cise.ufl.edu/~vvora/		 

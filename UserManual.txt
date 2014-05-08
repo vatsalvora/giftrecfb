@@ -1,0 +1,18 @@
+User Manual
+
+For best results use Mozilla Firefox
+
+1. Click a profile picture or name in order
+to view the suggestions
+
+2. Click Next or Previous to view different 
+categories for the suggestions
+
+
+3. Click any of the suggestions for a link to 
+further information 
+
+4. Click the close button [x] to exit the modal
+and restart the process to see suggestions for
+a different user.
+

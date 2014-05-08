@@ -1,8 +1,8 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Content-type: text/json");
-$username = "test_imdb";
-$password = "test";
+$username = "[USERNAME]";
+$password = "[PASSWORD]";
 $fid = $_GET['id'];
 $url = "http://api-test.filmaster.tv/rest/1.0/film/{$fid}/similar/";
 $ch = curl_init();
